@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
+
 @Slf4j
 @RestController
 public class FilmController {
@@ -17,16 +17,18 @@ public class FilmController {
     private int id = 1;
 
     @PostMapping("/films")
-    public void createFilm(@Valid @RequestBody Film film) {
+    public Film createFilm(@Valid @RequestBody Film film) {
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Описание содержит более 200 символов.");
         }
-        Instant minReleaseDate = Instant.parse("1895-12-28T00:00:00Z");
+        LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
         if (film.getReleaseDate().isBefore(minReleaseDate)) {
             throw new ValidationException("Неверная дата релиза.");
         }
-
+        film.setId(id++);
         films.put(film.getName(), film);
+        log.debug("Фильм <{}> успешно добавлен", film.getName());
+        return film;
 
     }
 
@@ -37,13 +39,25 @@ public class FilmController {
     }
 
     @PutMapping("/films")
-    public void updateUser(@Valid @RequestBody User user) {
-        if (user.getName().isEmpty()) user.setName(user.getLogin());
-        if (user.getLogin().contains(" ")) {
-            log.warn("Неккоректный логин при обновлении: {}", user.getLogin());
-            throw new ValidationException("Некорректный логин.");
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        if (film.getDescription().length() > 200) {
+            throw new ValidationException("Описание содержит более 200 символов.");
         }
-        users.put(user.getEmail(), user);
+        LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
+        if (film.getReleaseDate().isBefore(minReleaseDate)) {
+            throw new ValidationException("Неверная дата релиза.");
+        }
+        Film filmOld = films.get(film.getName());
+        if (filmOld == null) {
+            film.setId(id++);
+            films.put(film.getName(), film);
+            log.debug("Фильм <{}> успешно добавлен", film.getName());
+        } else {
+            film.setId(filmOld.getId());
+            films.put(film.getName(), film);
+            log.debug("Фильм <{}> успешно обновлен", film.getName());
+        }
+        return film;
     }
 
 }

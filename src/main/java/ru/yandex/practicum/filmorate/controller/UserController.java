@@ -26,7 +26,7 @@ public class UserController {
             log.warn("Пользователь c email - {} уже существует", user.getEmail());
             throw new ValidationException("Такой пользователь уже существует.");
         }
-        user.setId(++id);
+        user.setId(id++);
         log.debug("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
                 user.getId(), user.getName(), user.getEmail(), user.getLogin(), user.getBirthday());
         users.put(user.getEmail(), user);
@@ -51,7 +51,7 @@ public class UserController {
             user.setId(userOld.getId());
             log.debug("Пользователь {} был успешно обновлен.", user.getEmail());
         } else {
-            user.setId(++id);
+            user.setId(id++);
             log.debug("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
                     user.getId(), user.getName(), user.getEmail(), user.getLogin(), user.getBirthday());
         }
