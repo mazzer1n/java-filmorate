@@ -17,7 +17,7 @@ public class UserController {
 
     @PostMapping("/users")
     public User createUser(@Valid @RequestBody User user) {
-        if (user.getName().isEmpty()) user.setName(user.getLogin());
+        if (user.getName().equals("")) user.setName(user.getLogin());
         if (user.getLogin().contains(" ")) {
             log.warn("Неккоректный логин: {}", user.getLogin());
             throw new ValidationException("Некорректный логин.");

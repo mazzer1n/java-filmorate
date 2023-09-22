@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 @Slf4j
@@ -17,6 +18,15 @@ public class FilmController {
 
     @PostMapping("/films")
     public void createFilm(@Valid @RequestBody Film film) {
+        if (film.getDescription().length() > 200) {
+            throw new ValidationException("Описание содержит более 200 символов.");
+        }
+        Instant minReleaseDate = Instant.parse("1895-12-28T00:00:00Z");
+        if (film.getReleaseDate().isBefore(minReleaseDate)) {
+            throw new ValidationException("Неверная дата релиза.");
+        }
+
+        films.put(film.getName(), film);
 
     }
 
