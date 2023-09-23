@@ -13,11 +13,12 @@ import java.util.HashMap;
 @Slf4j
 @RestController
 public class FilmController {
-    private final HashMap<String, Film> films = new HashMap<>();
+    private final HashMap<Integer, Film> films = new HashMap<>();
     private int id = 1;
 
     @PostMapping("/films")
     public Film createFilm(@Valid @RequestBody Film film) {
+        if (film.getName().equals("")) throw new ValidationException("Неккоректное название фильма.");
         if (film.getDescription().length() > 200) {
             throw new ValidationException("Описание содержит более 200 символов.");
         }
@@ -25,8 +26,12 @@ public class FilmController {
         if (film.getReleaseDate().isBefore(minReleaseDate)) {
             throw new ValidationException("Неверная дата релиза.");
         }
+        if (film.getDuration() <= 0) {
+            log.debug("Неверное значение для поля duration - {}", film.getDuration());
+            throw new ValidationException("Некорректная продолжительность.");
+        }
         film.setId(id++);
-        films.put(film.getName(), film);
+        films.put(film.getId(), film);
         log.debug("Фильм <{}> успешно добавлен", film.getName());
         return film;
 
@@ -47,15 +52,17 @@ public class FilmController {
         if (film.getReleaseDate().isBefore(minReleaseDate)) {
             throw new ValidationException("Неверная дата релиза.");
         }
-        Film filmOld = films.get(film.getName());
-        if (filmOld == null) {
-            film.setId(id++);
-            films.put(film.getName(), film);
-            log.debug("Фильм <{}> успешно добавлен", film.getName());
+        if (film.getDuration() <= 0) {
+            log.debug("Неверное значение для поля duration - {}", film.getDuration());
+            throw new ValidationException("Некорректная продолжительность.");
+        }
+        Film filmOld = films.get(film.getId());
+        if (filmOld != null) {
+            films.put(film.getId(), film);
+            log.debug("Фильм <{}> успешно обновлен", film.getId());
         } else {
-            film.setId(filmOld.getId());
-            films.put(film.getName(), film);
-            log.debug("Фильм <{}> успешно обновлен", film.getName());
+            log.debug("Неверный id - {}", film.getId());
+            throw new ValidationException("Неверный идентификатор.");
         }
         return film;
     }

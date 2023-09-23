@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,9 +14,8 @@ public class Film {
     private final String name;
     @NotBlank
     private final String description;
-    @PastOrPresent
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private final LocalDate releaseDate;
-    @Positive
+    @Positive // это аннотация, как и @min(value=0) - не работает
     private final int duration;
 }
