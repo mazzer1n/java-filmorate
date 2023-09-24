@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.group.Marker;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
@@ -11,12 +13,14 @@ import java.util.Collection;
 import java.util.HashMap;
 
 @Slf4j
+@Validated
 @RestController
 public class FilmController {
     private final HashMap<Long, Film> films = new HashMap<>();
     private long id = 1;
 
     @PostMapping("/films")
+    @Validated(Marker.OnCreate.class)
     public Film createFilm(@Valid @RequestBody Film film) {
         validateFilm(film);
         film.setId(id++);
@@ -33,6 +37,7 @@ public class FilmController {
     }
 
     @PutMapping("/films")
+    @Validated(Marker.OnCreate.class)
     public Film updateFilm(@Valid @RequestBody Film film) {
         validateFilm(film);
         Film filmOld = films.get(film.getId());

@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.group.Marker;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -11,12 +13,14 @@ import java.util.Collection;
 import java.util.HashMap;
 
 @Slf4j
+@Validated
 @RestController
 public class UserController {
     private final HashMap<Long, User> users = new HashMap<>();
     private Long id = 1L;
 
     @PostMapping("/users")
+    @Validated(Marker.OnCreate.class)
     public User createUser(@Valid @RequestBody User user) {
         validateUser(user);
         if (user.getName().equals("")) user.setName(user.getLogin());
@@ -34,6 +38,7 @@ public class UserController {
     }
 
     @PutMapping("/users")
+    @Validated(Marker.OnUpdate.class)
     public User updateUser(@Valid @RequestBody User user) {
         validateUser(user);
         User userOld = users.get(user.getId());
