@@ -1,21 +1,21 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.Value;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
 @Data
 public class Film {
-    private int id = 0;
+    private Long id;
     @NotBlank
-    private final String name;
-    @NotBlank
-    private final String description;
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private final LocalDate releaseDate;
-    @Positive // это аннотация, как и @min(value=0) - не работает
-    private final int duration;
+    private String name;
+    @Size(min = 1, max = 200)
+    private String description;
+    @NotNull
+    private LocalDate releaseDate;
+    @Min(1)
+    private long duration;
 }
