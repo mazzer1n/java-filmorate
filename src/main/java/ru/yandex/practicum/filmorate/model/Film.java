@@ -6,6 +6,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.group.Marker;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -21,4 +23,16 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
+    private final Set<Long> likesId = new HashSet<>();
+
+    public void putLike(Long userId) {
+        likesId.add(userId);
+    }
+    public void removeLike(Long userId) {
+        likesId.remove(userId);
+    }
+
+    public int getLikes() {
+        return likesId.size();
+    }
 }

@@ -9,6 +9,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.group.Marker;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Data
 public class User {
@@ -23,5 +26,20 @@ public class User {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull
     private LocalDate birthday;
+    private final Set<Long> friends = new HashSet<>();
+
+    public void addFriend(Long id) {
+        friends.add(id);
+    }
+
+    public void deleteFriend(Long id) {
+        friends.remove(id);
+    }
+
+    public Set<Long> getCommonFriends(User user) {
+        Set<Long> duplicates = new HashSet<>(friends);
+        duplicates.retainAll(user.getFriends());
+        return duplicates;
+    }
 
 }
