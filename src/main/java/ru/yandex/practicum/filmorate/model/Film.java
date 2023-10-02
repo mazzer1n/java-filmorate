@@ -28,6 +28,7 @@ public class Film {
     public void putLike(Long userId) {
         likesId.add(userId);
     }
+
     public void removeLike(Long userId) {
         likesId.remove(userId);
     }
