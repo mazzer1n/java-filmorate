@@ -25,7 +25,7 @@ public class Film {
     private long duration;
     private final Set<Long> likesId = new HashSet<>();
 
-    public void putLike(Long userId) {
+    public void addLike(Long userId) {
         likesId.add(userId);
     }
 

@@ -17,10 +17,7 @@ public interface FilmStorage {
 
     public void validateFilm(Film film);
 
-    public Film changeLike(Long filmId, Long userId, boolean addition);
-
-    public Collection<Film> getPopularFilms(int count);
-
     public Film getFilm(Long id);
 
+    Film deleteFilm(Long id);
 }

@@ -19,14 +19,11 @@ public class InMemoryUserStorage implements UserStorage {
         validateUser(user);
         if (user.getName().equals("")) user.setName(user.getLogin());
         user.setId(++id);
-        log.info("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
-                user.getId(), user.getName(), user.getEmail(), user.getLogin(), user.getBirthday());
         users.put(user.getId(), user);
         return user;
     }
 
     public Collection<User> getUsers() {
-        log.info("Текущее колличество пользователей: {}", users.size());
         return users.values();
     }
 
@@ -35,7 +32,6 @@ public class InMemoryUserStorage implements UserStorage {
         User userOld = users.get(user.getId());
         if (userOld != null) {
             users.put(user.getId(), user);
-            log.info("Пользователь {} был успешно обновлен.", user.getId());
         } else {
             throw new NotFoundException("Пользователь не найден.");
         }
@@ -60,21 +56,6 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    public void changeFriend(Long firstId, Long secondId, boolean addition) {
-        User first = users.get(firstId);
-        User second = users.get(secondId);
-        if (first == null || second == null) {
-            throw new NotFoundException("Пользователь не найден.");
-        }
-        if (addition) {
-            first.addFriend(secondId);
-            second.addFriend(firstId);
-        } else {
-            first.deleteFriend(secondId);
-            second.deleteFriend(firstId);
-        }
-    }
-
     public List<User> getFriends(Long id) {
         User user = users.get(id);
         if (user == null) {
@@ -87,19 +68,12 @@ public class InMemoryUserStorage implements UserStorage {
         return friends;
     }
 
-    public List<User> getCommonFriends(Long firstId, Long secondId) {
-        User first = users.get(firstId);
-        User second = users.get(secondId);
-        if (first == null || second == null) {
+    public User deleteUser(Long id) {
+        User user = users.remove(id);
+        if (user == null) {
             throw new NotFoundException("Пользователь не найден.");
         }
-        Set<Long> commonFriendsId = first.getCommonFriends(second);
-        List<User> commonFriends = new ArrayList<>();
-        for (Long id : commonFriendsId) {
-            User user = users.get(id);
-            commonFriends.add(user);
-        }
-        return commonFriends;
+        return user;
     }
 
 }

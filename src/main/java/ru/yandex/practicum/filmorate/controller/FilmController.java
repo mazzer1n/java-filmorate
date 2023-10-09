@@ -27,7 +27,9 @@ public class FilmController {
     @PostMapping("/films")
     @Validated(Marker.OnCreate.class)
     public Film createFilm(@Valid @RequestBody Film film) {
-        return service.createFilm(film);
+        Film newFilm = service.createFilm(film);
+        log.info("Фильм <{}> успешно добавлен", film.getName());
+        return newFilm;
 
     }
 
@@ -48,18 +50,23 @@ public class FilmController {
     }
 
     @PutMapping("/films/{id}/like/{userId}")
-    public Film putLike(@PathVariable Long id, @PathVariable Long userId) {
-        return service.putLike(id, userId);
+    public void putLike(@PathVariable Long id, @PathVariable Long userId) {
+        service.addLike(id, userId);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
-    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        return service.removeLike(id, userId);
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        service.removeLike(id, userId);
     }
 
     @GetMapping("/films/popular")
     public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
         return service.getPopularFilms(count);
+    }
+
+    @DeleteMapping("/films/{id}")
+    public Film deleteFilm(@PathVariable Long id) {
+        return service.deleteFilm(id);
     }
 
 }

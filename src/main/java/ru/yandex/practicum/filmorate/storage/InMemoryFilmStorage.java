@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -22,7 +20,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         validateFilm(film);
         film.setId(++id);
         films.put(film.getId(), film);
-        log.info("Фильм <{}> успешно добавлен", film.getName());
         return film;
 
     }
@@ -37,6 +34,10 @@ public class InMemoryFilmStorage implements FilmStorage {
             throw new NotFoundException("Фильм не найден.");
         }
         return films.get(id);
+    }
+
+    public Film deleteFilm(Long id) {
+        return films.remove(id);
     }
 
     public Film updateFilm(Film film) {
@@ -65,27 +66,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
     }
 
-    public Film changeLike(final Long filmId, final Long userId, boolean addition) {
-        Film film = films.get(filmId);
-        if (film == null) {
-            throw new NotFoundException("Фильм не найден.");
-        }
-        if (userId < 1) {
-            throw new NotFoundException("Неверный id.");
-        }
-        if (addition) {
-            film.putLike(userId);
-        } else {
-            film.removeLike(userId);
-        }
-        return film;
-    }
-
-    public Collection<Film> getPopularFilms(int count) {
-        return films.values()
-                .stream()
-                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
-    }
 }

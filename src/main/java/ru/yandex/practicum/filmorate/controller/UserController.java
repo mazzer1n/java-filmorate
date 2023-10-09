@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,7 @@ import java.util.Collection;
 
 @Validated
 @RestController
+@Slf4j
 public class UserController {
     private final UserService service;
 
@@ -23,11 +25,15 @@ public class UserController {
     @PostMapping("/users")
     @Validated(Marker.OnCreate.class)
     public User createUser(@Valid @RequestBody User user) {
-        return service.createUser(user);
+        User addUser = service.createUser(user);
+        log.info("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
+                addUser.getId(), addUser.getName(), addUser.getEmail(), addUser.getLogin(), addUser.getBirthday());
+        return addUser;
     }
 
     @GetMapping("/users")
     public Collection<User> getUsers() {
+        log.info("Текущее колличество пользователей: {}", service.getUsers().size());
         return service.getUsers();
     }
 
@@ -39,7 +45,9 @@ public class UserController {
     @PutMapping("/users")
     @Validated(Marker.OnUpdate.class)
     public User updateUser(@Valid @RequestBody User user) {
-        return service.updateUser(user);
+        User updateUser = service.updateUser(user);
+        log.info("Пользователь {} был успешно обновлен.", updateUser.getId());
+        return updateUser;
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
@@ -62,5 +70,11 @@ public class UserController {
         return service.getCommonFriends(id, otherId);
     }
 
+    @DeleteMapping("/users/{id}")
+    public User deleteUser(@PathVariable Long id) {
+        User user = service.deleteUser(id);
+        log.info("Пользователь {} был успешно удален.", id);
+        return user;
+    }
 
 }
