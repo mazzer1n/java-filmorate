@@ -2,64 +2,79 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.group.Marker;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
 
-@Slf4j
 @Validated
 @RestController
+@Slf4j
 public class UserController {
-    private final HashMap<Long, User> users = new HashMap<>();
-    private Long id = 1L;
+    private final UserService service;
+
+    @Autowired
+    public UserController(UserService service) {
+        this.service = service;
+    }
 
     @PostMapping("/users")
     @Validated(Marker.OnCreate.class)
     public User createUser(@Valid @RequestBody User user) {
-        validateUser(user);
-        if (user.getName().equals("")) user.setName(user.getLogin());
-        user.setId(id++);
+        User addUser = service.createUser(user);
         log.info("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
-                user.getId(), user.getName(), user.getEmail(), user.getLogin(), user.getBirthday());
-        users.put(user.getId(), user);
-        return user;
+                addUser.getId(), addUser.getName(), addUser.getEmail(), addUser.getLogin(), addUser.getBirthday());
+        return addUser;
     }
 
     @GetMapping("/users")
     public Collection<User> getUsers() {
-        log.info("Текущее колличество пользователей: {}", users.size());
-        return users.values();
+        log.info("Текущее колличество пользователей: {}", service.getUsers().size());
+        return service.getUsers();
+    }
+
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return service.getUserById(id);
     }
 
     @PutMapping("/users")
     @Validated(Marker.OnUpdate.class)
     public User updateUser(@Valid @RequestBody User user) {
-        validateUser(user);
-        User userOld = users.get(user.getId());
-        if (userOld != null) {
-            users.put(user.getId(), user);
-            log.info("Пользователь {} был успешно обновлен.", user.getId());
-        } else {
-            throw new ValidationException("Неккоректный id.");
-        }
+        User updateUser = service.updateUser(user);
+        log.info("Пользователь {} был успешно обновлен.", updateUser.getId());
+        return updateUser;
+    }
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        service.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        service.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public Collection<User> getFriends(@PathVariable Long id) {
+        return service.getFriends(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return service.getCommonFriends(id, otherId);
+    }
+
+    @DeleteMapping("/users/{id}")
+    public User deleteUser(@PathVariable Long id) {
+        User user = service.deleteUser(id);
+        log.info("Пользователь {} был успешно удален.", id);
         return user;
     }
-
-    public void validateUser(User user) {
-        if (user.getLogin().contains(" ")) {
-            throw new ValidationException("Некорректный логин.");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            throw new ValidationException("Некорректная  дата рождения.");
-        }
-
-    }
-
 
 }

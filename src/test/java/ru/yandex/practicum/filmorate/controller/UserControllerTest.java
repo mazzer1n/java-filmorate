@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 
@@ -12,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class UserControllerTest {
 
-    private final UserController userController = new UserController();
+    private final InMemoryUserStorage storage = new InMemoryUserStorage();
     private final User user = new User();
 
     @BeforeEach
@@ -25,18 +26,18 @@ class UserControllerTest {
 
     @Test
     void validateUserOk() {
-        userController.validateUser(user);
+        storage.validateUser(user);
     }
 
     @Test
     void validateFilmFail() {
         user.setLogin("User Login");
-        Exception exception = assertThrows(ValidationException.class, () -> userController.validateUser(user));
+        Exception exception = assertThrows(ValidationException.class, () -> storage.validateUser(user));
         assertEquals("Некорректный логин.", exception.getMessage());
 
         user.setLogin("UserLogin");
         user.setBirthday(LocalDate.now().plusDays(1));
-        exception = assertThrows(ValidationException.class, () -> userController.validateUser(user));
+        exception = assertThrows(ValidationException.class, () -> storage.validateUser(user));
         assertEquals("Некорректная  дата рождения.", exception.getMessage());
 
     }

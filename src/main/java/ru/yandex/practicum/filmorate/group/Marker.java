@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.group;
 
 public interface Marker {
 
-    interface OnCreate {}
+    interface OnCreate {
+    }
 
-    interface OnUpdate {}
+    interface OnUpdate {
+    }
 
 }
