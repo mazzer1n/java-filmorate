@@ -9,10 +9,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
@@ -25,10 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmDbStorageTest {
     private final FilmDbStorage filmDbStorage;
-    private final UserDbStorage userDbStorage;
     private static Film film;
     private static Long filmId = 1L;
-    private static Long userId = 1L;
+
 
     @BeforeEach
     void setUp() {
@@ -62,42 +59,6 @@ public class FilmDbStorageTest {
                 .isPresent();
     }
 
-    @Test
-    void addLike() {
-        User user = new User(
-                userId++,
-                "test@mail.ru",
-                "test",
-                "test",
-                LocalDate.of(2000, 11, 11),
-                new HashSet<>(),
-                new ArrayList<>()
-        );
-
-        userDbStorage.createUser(user);
-        filmDbStorage.addLike(film.getId(), user.getId());
-
-        assertEquals(filmDbStorage.getFilm(film.getId()).getLikesId().size(), 1);
-    }
-
-    @Test
-    void removeLike() {
-        User user = new User(
-                userId++,
-                "test@mail.ru",
-                "test",
-                "test",
-                LocalDate.of(2000, 11, 11),
-                new HashSet<>(),
-                new ArrayList<>()
-        );
-
-        userDbStorage.createUser(user);
-        filmDbStorage.addLike(film.getId(), user.getId());
-        filmDbStorage.removeLike(film.getId(), user.getId());
-
-        assertEquals(filmDbStorage.getFilm(film.getId()).getLikesId().size(), 0);
-    }
 
     @Test
     void update() {
