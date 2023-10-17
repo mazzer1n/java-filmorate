@@ -15,9 +15,11 @@ public interface FilmStorage {
 
     public Film updateFilm(Film film);
 
-    public void validateFilm(Film film);
-
     public Film getFilm(Long id);
 
-    Film deleteFilm(Long id);
+    Film addLike(Long filmId, Long userId);
+
+    Film removeLike(Long filmId, Long userId);
+
+    boolean deleteFilm(Long id);
 }

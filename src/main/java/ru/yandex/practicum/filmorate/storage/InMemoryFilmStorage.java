@@ -3,10 +3,8 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -17,7 +15,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Long id = 0L;
 
     public Film createFilm(Film film) {
-        validateFilm(film);
         film.setId(++id);
         films.put(film.getId(), film);
         return film;
@@ -36,12 +33,37 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
-    public Film deleteFilm(Long id) {
-        return films.remove(id);
+    @Override
+    public Film addLike(Long filmId, Long userId) {
+        Film film = this.getFilm(filmId);
+        film.getLikesId().add(userId);
+
+        return film;
+    }
+
+    @Override
+    public Film removeLike(Long filmId, Long userId) {
+        Film film = this.getFilm(filmId);
+
+        if (userId <= 0) {
+            throw new NotFoundException("Лайк данного пользователя не найден.");
+        }
+
+
+        if (film.getLikesId().contains(userId)) {
+            film.getLikesId().remove(userId);
+        } else {
+            throw new NotFoundException("Лайк данного пользователя не найден.");
+        }
+
+        return film;
+    }
+
+    public boolean deleteFilm(Long id) {
+        return films.remove(id) != null;
     }
 
     public Film updateFilm(Film film) {
-        validateFilm(film);
         Film filmOld = films.get(film.getId());
         if (filmOld != null) {
             films.put(film.getId(), film);
@@ -52,18 +74,5 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public void validateFilm(Film film) {
-        if (film.getName().equals("")) throw new ValidationException("Неккоректное название фильма.");
-        if (film.getDescription().length() > 200) {
-            throw new ValidationException("Описание содержит более 200 символов.");
-        }
-        LocalDate minReleaseDate = LocalDate.of(1895, 12, 28);
-        if (film.getReleaseDate().isBefore(minReleaseDate)) {
-            throw new ValidationException("Неверная дата релиза.");
-        }
-        if (film.getDuration() <= 0) {
-            throw new ValidationException("Некорректная продолжительность.");
-        }
-    }
 
 }

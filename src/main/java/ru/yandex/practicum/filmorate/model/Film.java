@@ -1,18 +1,19 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.yandex.practicum.filmorate.group.Marker;
 
+import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Data
+@Builder
 public class Film {
-    @Null(groups = Marker.OnCreate.class)
-    @NotNull(groups = Marker.OnUpdate.class)
+    @Positive
     private Long id;
     @NotBlank
     private String name;
@@ -23,17 +24,18 @@ public class Film {
     private LocalDate releaseDate;
     @Min(1)
     private long duration;
-    private final Set<Long> likesId = new HashSet<>();
+    private Set<Long> likesId;
+    private Set<Genre> genres;
+    private MpaRating mpa;
 
-    public void addLike(Long userId) {
-        likesId.add(userId);
-    }
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("rating_id", mpa.getId());
 
-    public void removeLike(Long userId) {
-        likesId.remove(userId);
-    }
-
-    public int getLikes() {
-        return likesId.size();
+        return values;
     }
 }

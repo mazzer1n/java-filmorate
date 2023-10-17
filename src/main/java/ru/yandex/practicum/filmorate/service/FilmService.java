@@ -1,63 +1,84 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
-    private final FilmStorage storage;
-    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final static int DEFAULT_COUNT_VALUE = 10;
+    private final FilmValidator validator;
 
     @Autowired
-    public FilmService(FilmStorage storage, UserStorage userStorage) {
-        this.storage = storage;
-        this.userStorage = userStorage;
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, FilmValidator validator) {
+        this.filmStorage = filmStorage;
+        this.validator = validator;
     }
 
     public Film createFilm(Film film) {
-        return storage.createFilm(film);
-    }
-
-    public Collection<Film> getFilms() {
-        return storage.getFilms();
+        validator.validateFilm(film);
+        return filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        return storage.updateFilm(film);
+        validator.validateFilm(film);
+        return filmStorage.updateFilm(film);
     }
 
-    public void addLike(long id, long userId) {
-        final Film film = storage.getFilm(id);
-        userStorage.getUserById(userId);
-        film.addLike(userId);
+    public Collection<Film> getFilms() {
+        return filmStorage.getFilms();
     }
 
-    public void removeLike(long id, long userId) {
-        final Film film = storage.getFilm(id);
-        userStorage.getUserById(userId);
-        film.removeLike(userId);
+    public Film getFilm(Long id) {
+        return filmStorage.getFilm(id);
     }
 
-    public Collection<Film> getPopularFilms(int count) {
-        return storage.getFilms()
-                .stream()
-                .sorted(Comparator.comparingInt(Film::getLikes).reversed())
+    public boolean deleteFilm(Long id) {
+        return filmStorage.deleteFilm(id);
+    }
+
+    public Film addLike(Long filmId, Long userId) {
+        return filmStorage.addLike(filmId, userId);
+    }
+
+    public Film removeLike(Long filmId, Long userId) {
+        return filmStorage.removeLike(filmId, userId);
+    }
+
+    public List<Film> getPopularFilms(Integer count) {
+        count = checkPopularFilmCount(count);
+
+        filmStorage.getFilms().forEach(this::initLikesIfNull);
+
+        return filmStorage.getFilms().stream()
+                .sorted((film1, film2) -> film2.getLikesId().size() - film1.getLikesId().size())
                 .limit(count)
                 .collect(Collectors.toList());
     }
 
-    public Film getFilm(Long id) {
-        return storage.getFilm(id);
+    public void initLikesIfNull(Film film) {
+        Set<Long> likes = film.getLikesId();
+        if (likes == null) {
+            likes = new HashSet<>();
+        }
+
+        film.setLikesId(likes);
     }
 
-    public Film deleteFilm(Long id) {
-        return storage.deleteFilm(id);
+    private Integer checkPopularFilmCount(Integer count) {
+        if (count == null || count == 0) {
+            count = DEFAULT_COUNT_VALUE;
+        }
+
+        return count;
     }
 }
