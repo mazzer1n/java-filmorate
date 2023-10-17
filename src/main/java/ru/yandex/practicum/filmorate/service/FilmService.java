@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final static int DEFAULT_COUNT_VALUE = 10;
     private final FilmValidator validator;
 
     @Autowired
@@ -76,7 +75,7 @@ public class FilmService {
 
     private Integer checkPopularFilmCount(Integer count) {
         if (count == null || count == 0) {
-            count = DEFAULT_COUNT_VALUE;
+            count = 10;
         }
 
         return count;
