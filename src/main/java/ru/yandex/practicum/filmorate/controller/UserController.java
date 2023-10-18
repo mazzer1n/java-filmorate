@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import javax.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.group.Marker;
+
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -23,7 +24,6 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    @Validated(Marker.OnCreate.class)
     public User createUser(@Valid @RequestBody User user) {
         User addUser = service.createUser(user);
         log.info("Зарегистрирован новый пользователь: id - {}, name - {}, email - {} , login - {}, birthday - {}",
@@ -43,7 +43,6 @@ public class UserController {
     }
 
     @PutMapping("/users")
-    @Validated(Marker.OnUpdate.class)
     public User updateUser(@Valid @RequestBody User user) {
         User updateUser = service.updateUser(user);
         log.info("Пользователь {} был успешно обновлен.", updateUser.getId());
@@ -71,10 +70,9 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public User deleteUser(@PathVariable Long id) {
-        User user = service.deleteUser(id);
+    public void deleteUser(@PathVariable Long id) {
+        service.deleteUser(id);
         log.info("Пользователь {} был успешно удален.", id);
-        return user;
     }
 
 }

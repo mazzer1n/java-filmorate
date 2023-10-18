@@ -1,72 +1,76 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.group.Marker;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
 
-@Slf4j
-@Validated
 @RestController
+@RequestMapping("/films")
+@Slf4j
+@RequiredArgsConstructor
 public class FilmController {
+    private final FilmService filmService;
 
-    private final FilmService service;
-
-    @Autowired
-    public FilmController(FilmService service) {
-        this.service = service;
+    @GetMapping
+    public Collection<Film> getAllFilms() {
+        log.info("Пришел запрос на получение списка всех фильмов.");
+        return filmService.getFilms();
     }
 
-
-    @PostMapping("/films")
-    @Validated(Marker.OnCreate.class)
-    public Film createFilm(@Valid @RequestBody Film film) {
-        Film newFilm = service.createFilm(film);
-        log.info("Фильм <{}> успешно добавлен", film.getName());
-        return newFilm;
-
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Long id) {
+        log.info("Пришел запрос на получение фильма по id " + id);
+        return filmService.getFilm(id);
     }
 
-    @GetMapping("/films")
-    public Collection<Film> getFilm() {
-        return service.getFilms();
+    @DeleteMapping("/{id}")
+    public void deleteFilmById(@PathVariable Long id) {
+        log.info("Пришел запрос на удаление фильма с id " + id);
+        filmService.deleteFilm(id);
     }
 
-    @GetMapping("/films/{id}")
-    public Film getFilm(@PathVariable Long id) {
-        return service.getFilm(id);
+    @PostMapping
+    public Film createNewFilm(@Valid @RequestBody Film film) {
+        log.info("Пришел запрос на создание фильма с названием " + film.getName());
+        return filmService.createFilm(film);
     }
 
-    @PutMapping("/films")
-    @Validated(Marker.OnCreate.class)
+    @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        return service.updateFilm(film);
+        log.info("Пришел запрос на обновление фильма с id " + film.getId());
+        return filmService.updateFilm(film);
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
-    public void putLike(@PathVariable Long id, @PathVariable Long userId) {
-        service.addLike(id, userId);
+    @PutMapping("/{id}/like/{userId}")
+    public Film like(@PathVariable Long id, @PathVariable Long userId) {
+        log.info(
+                "Пришел запрос на добавление лайка пользователя фильму " +
+                        filmService.getFilm(id).getName()
+        );
+
+        return filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
-    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
-        service.removeLike(id, userId);
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info(
+                "Пришел запрос на удаление лайка пользователя с фильма " +
+                        filmService.getFilm(id)
+        );
+
+        return filmService.removeLike(id, userId);
     }
 
-    @GetMapping("/films/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return service.getPopularFilms(count);
+    @GetMapping("/popular")
+    public List<Film> getMostPopularFilms(@RequestParam(required = false) Integer count) {
+        log.info("Пришел запрос на получение списка самых популярных фильмов.");
+        return filmService.getPopularFilms(count);
     }
-
-    @DeleteMapping("/films/{id}")
-    public Film deleteFilm(@PathVariable Long id) {
-        return service.deleteFilm(id);
-    }
-
 }
+

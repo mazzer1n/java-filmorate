@@ -1,44 +1,55 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
-import lombok.Data;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-import ru.yandex.practicum.filmorate.group.Marker;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@Builder
+@EqualsAndHashCode(of = "id")
+@AllArgsConstructor
 public class User {
-    @Null(groups = Marker.OnCreate.class)
-    @NotNull(groups = Marker.OnUpdate.class)
+    @Positive
     private Long id;
+
     @Email
+    @NotNull
     private String email;
+
     @NotBlank
+    @NotNull
     private String login;
     private String name = "";
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull
     private LocalDate birthday;
-    private final Set<Long> friends = new HashSet<>();
 
-    public void addFriend(Long id) {
-        friends.add(id);
+    private Set<Long> friends;
+    private List<Friendship> friendships;
+
+    public Map<String, Object> toMap() {
+        if (name == null || name.isEmpty()) {
+            name = login;
+        }
+
+        Map<String, Object> values = new HashMap<>();
+        values.put("email", email);
+        values.put("login", login);
+        values.put("name", name);
+        values.put("birthday", birthday);
+
+        return values;
     }
-
-    public void deleteFriend(Long id) {
-        friends.remove(id);
-    }
-
-    public Set<Long> getCommonFriends(User user) {
-        Set<Long> duplicates = new HashSet<>(friends);
-        duplicates.retainAll(user.getFriends());
-        return duplicates;
-    }
-
 }
+
