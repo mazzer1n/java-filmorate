@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Builder
+@EqualsAndHashCode(of = {"senderId", "recipientId"})
 @AllArgsConstructor
+@Setter
 public class Friendship {
     private Long senderId;
     private Long recipientId;

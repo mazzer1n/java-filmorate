@@ -30,9 +30,9 @@ public class FilmController {
     }
 
     @DeleteMapping("/{id}")
-    public boolean deleteFilmById(@PathVariable Long id) {
+    public void deleteFilmById(@PathVariable Long id) {
         log.info("Пришел запрос на удаление фильма с id " + id);
-        return filmService.deleteFilm(id);
+        filmService.deleteFilm(id);
     }
 
     @PostMapping

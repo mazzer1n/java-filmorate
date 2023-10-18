@@ -1,37 +1,42 @@
 package ru.yandex.practicum.filmorate.model;
 
-import javax.validation.constraints.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
+@EqualsAndHashCode(of = "id")
 @AllArgsConstructor
-@NoArgsConstructor
 public class User {
     @Positive
     private Long id;
+
     @Email
     @NotNull
     private String email;
+
     @NotBlank
     @NotNull
     private String login;
     private String name = "";
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @NotNull
     private LocalDate birthday;
-    private Set<Long> friends = new HashSet<>();
-    private List<Friendship> friendships;
 
+    private Set<Long> friends;
+    private List<Friendship> friendships;
 
     public Map<String, Object> toMap() {
         if (name == null || name.isEmpty()) {
@@ -46,5 +51,5 @@ public class User {
 
         return values;
     }
-
 }
+

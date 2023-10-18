@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 @Qualifier("userDbStorage")
@@ -75,7 +76,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public boolean deleteUser(Long id) {
+    public void deleteUser(Long id) {
         getUserById(id);
 
         String sqlQueryDeleteLikes = "delete from likes where user_id = ?";
@@ -85,7 +86,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQueryDeleteFriends, id, id);
 
         String sqlQueryDeleteUsers = "delete from users where user_id = ?";
-        return jdbcTemplate.update(sqlQueryDeleteUsers, id) > 0;
+        jdbcTemplate.update(sqlQueryDeleteUsers, id);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
@@ -122,19 +123,20 @@ public class UserDbStorage implements UserStorage {
 
     private void updateUserFriendships(User user) {
         if (user.getFriendships() != null) {
+
             String sqlQueryDeleteFriends = "delete from user_friendships where sender_id = ? or recipient_id = ?";
             jdbcTemplate.update(sqlQueryDeleteFriends, user.getId(), user.getId());
 
-            for (Friendship friendship : user.getFriendships()) {
-                String sqlQueryAddFriend = "insert into user_friendships(sender_id, recipient_id, is_friend) " +
-                        "values (?, ?, ?)";
-                jdbcTemplate.update(
-                        sqlQueryAddFriend,
-                        friendship.getSenderId(),
-                        friendship.getRecipientId(),
-                        friendship.isFriend()
-                );
-            }
+            List<Friendship> friendships = user.getFriendships();
+            List<Object[]> batchParameters = friendships.stream()
+                    .map(friendship -> new Object[]{user.getId(), friendship.getRecipientId(), friendship.isFriend()})
+                    .collect(Collectors.toList());
+
+            String sqlQueryAddFriends = "insert into user_friendships(sender_id, recipient_id, is_friend) values (?, ?, ?)";
+
+            jdbcTemplate.batchUpdate(sqlQueryAddFriends, batchParameters);
         }
     }
+
 }
+

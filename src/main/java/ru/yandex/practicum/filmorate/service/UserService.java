@@ -43,8 +43,8 @@ public class UserService {
         return userStorage.getUserById(id);
     }
 
-    public boolean deleteUser(Long id) {
-        return userStorage.deleteUser(id);
+    public void deleteUser(Long id) {
+        userStorage.deleteUser(id);
     }
 
     public User addFriend(Long userId, Long friendId) {

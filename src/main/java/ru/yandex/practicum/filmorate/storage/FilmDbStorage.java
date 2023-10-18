@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Qualifier("filmDbStorage")
@@ -89,17 +90,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public boolean deleteFilm(Long id) {
-        getFilm(id);
-
-        String sqlQueryDeleteLikes = "delete from likes where film_id = ?";
-        jdbcTemplate.update(sqlQueryDeleteLikes, id);
-
-        String sqlQueryDeleteGenres = "delete from film_genres where film_id = ?";
-        jdbcTemplate.update(sqlQueryDeleteGenres, id);
-
-        String sqlQueryDeleteFilms = "delete from films where film_id = ?";
-        return jdbcTemplate.update(sqlQueryDeleteFilms, id) > 0;
+    public void deleteFilm(Long id) {
+        String sqlQuery = "delete from FILMS WHERE FILM_ID = ?";
+        jdbcTemplate.update(sqlQuery, id);
     }
 
 
@@ -137,25 +130,39 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private void insertFilmGenreInTable(Film film, Long filmId) {
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                String sqlQuery = "insert into film_genres (film_id, genre_id) values (?, ?)";
-                jdbcTemplate.update(sqlQuery, filmId, genre.getId());
-            }
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            String sqlQuery = "insert into film_genres (film_id, genre_id) values (?, ?)";
+
+            List<Object[]> batchArgs = film.getGenres().stream()
+                    .map(genre -> new Object[]{filmId, genre.getId()})
+                    .collect(Collectors.toList());
+
+            jdbcTemplate.batchUpdate(sqlQuery, batchArgs);
         }
     }
+
+
 
     private void updateFilmLikes(Film film) {
         if (film.getLikesId() != null) {
-            String sqlQueryDeleteLikes = "delete from likes where film_id = ?";
-            jdbcTemplate.update(sqlQueryDeleteLikes, film.getId());
+            Long filmId = film.getId();
+            Set<Long> likes = film.getLikesId();
 
-            for (Long userId : film.getLikesId()) {
+            String sqlQueryDeleteLikes = "delete from likes where film_id = ?";
+            jdbcTemplate.update(sqlQueryDeleteLikes, filmId);
+
+            if (!likes.isEmpty()) {
+                List<Object[]> batchArgs = new ArrayList<>();
+                for (Long userId : likes) {
+                    batchArgs.add(new Object[]{filmId, userId});
+                }
+
                 String sqlQueryAddLikes = "insert into likes (film_id, user_id) values (?, ?)";
-                jdbcTemplate.update(sqlQueryAddLikes, film.getId(), userId);
+                jdbcTemplate.batchUpdate(sqlQueryAddLikes, batchArgs);
             }
         }
     }
+
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
         return Film.builder()

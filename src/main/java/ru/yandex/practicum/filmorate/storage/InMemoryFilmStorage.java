@@ -59,8 +59,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    public boolean deleteFilm(Long id) {
-        return films.remove(id) != null;
+    public void deleteFilm(Long id) {
+        films.remove(id);
     }
 
     public Film updateFilm(Film film) {

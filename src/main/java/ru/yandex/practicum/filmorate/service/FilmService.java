@@ -41,8 +41,8 @@ public class FilmService {
         return filmStorage.getFilm(id);
     }
 
-    public boolean deleteFilm(Long id) {
-        return filmStorage.deleteFilm(id);
+    public void deleteFilm(Long id) {
+        filmStorage.deleteFilm(id);
     }
 
     public Film addLike(Long filmId, Long userId) {

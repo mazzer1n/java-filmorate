@@ -13,6 +13,6 @@ public interface UserStorage {
 
     public User getUserById(Long id);
 
-    boolean deleteUser(Long id);
+    void deleteUser(Long id);
 
 }

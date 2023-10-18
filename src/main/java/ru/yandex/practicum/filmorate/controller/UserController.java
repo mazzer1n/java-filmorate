@@ -70,10 +70,9 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public boolean deleteUser(@PathVariable Long id) {
-        boolean result = service.deleteUser(id);
+    public void deleteUser(@PathVariable Long id) {
+        service.deleteUser(id);
         log.info("Пользователь {} был успешно удален.", id);
-        return result;
     }
 
 }
